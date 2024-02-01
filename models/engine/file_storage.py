@@ -29,10 +29,25 @@ class FileStorage:
         if cls is not None:
             new_dict = {}
             for key, value in self.__objects.items():
+                # check if the class passed as a String or Class
                 if cls == value.__class__ or cls == value.__class__.__name__:
                     new_dict[key] = value
             return new_dict
         return self.__objects
+
+    def get(self, cls, id):
+        """retrieve an instance of a class based on ID"""
+
+        if (cls is None or cls not in classes.values()) or \
+                (id is None or id == ''):
+            return None
+
+        key = f"{cls().__class__.__name__}.{id}"
+        values = self.all().get(key)
+        if values:
+            return values
+
+        return None
 
     def new(self, obj):
         """sets in __objects the obj with key <obj class name>.id"""

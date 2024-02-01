@@ -51,6 +51,20 @@ class DBStorage:
                     new_dict[key] = obj
         return (new_dict)
 
+    def get(self, cls, id):
+        """retrieve an instance of a class based on ID"""
+
+        if (cls is None or cls not in classes.values()) or \
+                (id is None or id == ''):
+            return None
+
+        key = f"{cls().__class__.__name__}.{id}"
+        values = self.all().get(key)
+        if values:
+            return values
+
+        return None
+
     def new(self, obj):
         """add the object to the current database session"""
         self.__session.add(obj)
