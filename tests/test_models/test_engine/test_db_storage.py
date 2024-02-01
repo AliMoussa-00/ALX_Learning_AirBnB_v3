@@ -149,10 +149,10 @@ class TestFileStorage(unittest.TestCase):
         """the count method to get the number of objects or all objects"""
         count = self.test_db_storage.count()
 
-        count1 = len(self.test_db_storage.all(State))
+        count1 = self.test_db_storage.count(State)
         s = State(name="Alabama")
         self.test_db_storage.new(s)
-        count2 = len(self.test_db_storage.all(State))
+        count2 = self.test_db_storage.count(State)
 
         self.assertEqual(count + 1, len(self.test_db_storage.all()))
         self.assertEqual(count1 + 1, count2)

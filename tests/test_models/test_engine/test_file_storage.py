@@ -147,10 +147,10 @@ class TestFileStorage(unittest.TestCase):
         storage = FileStorage()
         count = storage.count()
 
-        count1 = len(storage.all(State))
+        count1 = storage.count(State)
         s = State()
         storage.new(s)
-        count2 = len(storage.all(State))
+        count2 = storage.count(State)
 
         self.assertEqual(count + 1, len(storage.all()))
         self.assertEqual(count1 + 1, count2)
