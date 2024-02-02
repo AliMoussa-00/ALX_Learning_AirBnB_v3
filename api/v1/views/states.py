@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Defining the state module to retrieve the state objs"""
+"""Defining the states module to request the states objs"""
 
 from api.v1.views import app_views
 from flask import abort, jsonify, request
@@ -50,14 +50,14 @@ def create_state():
 
     state = State(name=request.get_json()['name'])
     state.save()
-    return jsonify(state.to_dict(), 201)
+    return jsonify(state.to_dict()), 201
 
 
 @app_views.route('/states/<state_id>', methods=['PUT'])
 def update_state(state_id):
     """update state object"""
     if not request.get_json():
-        return jsonify({'error': 'Not a JSON'}, 400)
+        return jsonify({'error': 'Not a JSON'}), 400
 
     state = storage.all(State).get(f"State.{state_id}")
     if not state:
