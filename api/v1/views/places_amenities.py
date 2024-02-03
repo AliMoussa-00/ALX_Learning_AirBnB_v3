@@ -30,7 +30,8 @@ def get_place_amenities(place_id):
     return jsonify(amenities)
 
 
-@app_views.route('/places/<place_id>/amenities/<amenity_id>', methods=['DELETE'])
+@app_views.route('/places/<place_id>/amenities/<amenity_id>',
+                 methods=['DELETE'])
 def delete_place_amenity(place_id, amenity_id):
     """delete an amenity from place object by id"""
     place = storage.all(Place).get(f"Place.{place_id}")
@@ -68,12 +69,19 @@ def link_amenity_place(place_id, amenity_id):
     if not ame:
         abort(404)
 
-    # check if the amenity already linked to place
-    place_amenity = place.amenities.get(ame)
-    if place_amenity:
-        return jsonify(ame.to_dict()), 200
+    if models.storage_t == "db":
+        # check if the amenity already linked to place
+        for obj in place.amenities:
+            if obj.id == amenity_id:
+                return jsonify(ame.to_dict()), 200
 
-    setattr(place, 'amenity_ids', place.amenity_ids.append(amenity_id))
+        place.amenities.append(ame)
+
+    else:
+        if amenity_id in place.amenity_ids:
+            return jsonify(ame.to_dict()), 200
+
+        place.amenity_ids.append(amenity_id)
 
     place.save()
-    return jsonify(ame_dict()), 201
+    return jsonify(ame.to_dict()), 201
