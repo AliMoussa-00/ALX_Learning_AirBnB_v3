@@ -3,9 +3,11 @@
 
 from api.v1.views import app_views
 from flask import abort, jsonify, request
+import models
 from models import storage
 from models.city import City
 from models.place import Place
+from models.state import State
 from models.user import User
 
 
@@ -89,3 +91,52 @@ def update_place(place_id):
 
     place.save()
     return jsonify(place.to_dict())
+
+
+@app_views.route('/places_search', methods=['POST'])
+def search_place():
+    """serach and filter places"""
+    if not request.get_json():
+        return jsonify({'error': 'Not a JSON'}), 400
+
+    list_states_ids = request.get_json().get("states")
+    list_cities_ids = request.get_json().get('cities')
+    list_amenities_ids = request.get_json().get('amenities')
+    list_places = []
+
+    if not list_states_ids and not list_cities_ids:
+        list_places = storage.all(Place).values()
+
+    if list_states_ids:
+        for s_id in list_states_ids:
+            state = storage.all(State).get(f"State.{s_id}")
+            if state:
+                for c in state.cities:
+                    list_places.extend(c.places)
+
+    if list_cities_ids:
+        for c_id in list_cities_ids:
+            city = storage.all(City).get(f"City.{c_id}")
+            if city:
+                list_places.extend(city.places)
+    # remove any duplicates
+    list_places = list(set(list_places))
+    if list_amenities_ids:
+        for place in list_places:
+            place_ame = []
+            if models.storage_t == "db":
+                place_ame = [ame.id for ame in place.amenities]
+            else:
+                place_ame = place.amenity_ids
+
+            if not all(ame_id in place_ame for ame_id in list_amenities_ids):
+                list_places.remove(place)
+    places = []
+    for p in list_places:
+        p_dict = p.to_dict().copy()
+
+        if "amenities" in p.to_dict():
+            del p_dict["amenities"]
+        places.append(p_dict)
+
+    return jsonify(places)
