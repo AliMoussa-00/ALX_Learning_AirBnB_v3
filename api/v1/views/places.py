@@ -87,7 +87,7 @@ def update_place(place_id):
     for k, v in request.get_json().items():
         if k in ignor:
             continue
-        setattr(user, k, v)
+        setattr(place, k, v)
 
     place.save()
     return jsonify(place.to_dict())
